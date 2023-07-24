@@ -27,49 +27,6 @@ os.path.exists(raw_dir) or os.mkdirs(raw_dir)
 os.path.exists(md_dir) or os.mkdirs(md_dir)
 
 
-def get_youtube_videos(url, output='./'):
-    videos = []
-
-    ydl_opts = {
-        'format': 'm4a/bestaudio/best',
-        'outtmpl': os.path.join(output, '%(id)s.%(ext)s'),
-        # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
-        'postprocessors': [{  # Extract audio using ffmpeg
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'wav',
-        }]
-    }
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        try:
-            error_code = ydl.download([url])
-            print('download')
-            list_video_info = [ydl.extract_info(url, download=False)]
-            print(f'{url} end')
-        except Exception as e:
-            print(e)
-    for video_info in list_video_info:
-        print(video_info)
-    host = 'https://www.youtube.com/'
-    with open('jojo.html', 'r') as file:
-        content = file.read()
-    tree = html.fromstring(content)
-    links = tree.xpath("//a[@id='video-title-link']")
-    # 打印链接的title和url
-    for link in links:
-        item = {}
-        title = link.attrib.get('title')
-        path = link.attrib.get('href')
-        url = urljoin(host, path)
-        item['author'] = ''
-        item['title'] = title
-        item['url'] = url
-        item['identifier'] = url.split('=')[-1]
-        item['md_file'] = os.path.join(md_dir, item['identifier'] + '.md')
-        videos.append(item)
-    return videos
-
-
 def download_youtube_single_audio(video_url, shared_dict):
     youtube = YouTube(video_url)
     if os.path.exists(os.path.join(raw_dir, youtube.video_id + '.mp3')):
@@ -80,7 +37,7 @@ def download_youtube_single_audio(video_url, shared_dict):
             'author': youtube.author,
             'url': youtube.watch_url,
             'md_file': os.path.join(md_dir, youtube.video_id + '.md'),
-            'channel_id': youtube.channel_id
+            'channel': youtube.channel_id
         }
         return
     # download the highest quality audio stream
@@ -104,23 +61,11 @@ def download_youtube_single_audio(video_url, shared_dict):
             'title': youtube.title,
             'author': youtube.author,
             'url': youtube.watch_url,
-            'md_file': os.path.join(md_dir, youtube.video_id + '.md')
+            'md_file': os.path.join(md_dir, youtube.video_id + '.md'),
+            'channel': youtube.channel_id
         }
     except Exception as e:
         print(e)
-
-
-def save_channel_audios(videos, user=None):
-    for video in videos:
-        if os.path.isfile(os.path.join(raw_dir, video['identifier'] + '.mp3')):
-            print(f'{video["identifier"]} already exists')
-            continue
-        try:
-            # extract_audio(video, raw_dir)
-            print(f'{video["identifier"]} done')
-        except Exception as e:
-            print(e)
-            print(f'{video["identifier"]} failed')
 
 
 def audios_to_md(audios):

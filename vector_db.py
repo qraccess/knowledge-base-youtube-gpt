@@ -20,6 +20,7 @@ class EmbeddingEntity(Base):
     title = Column(String(256))
     author = Column(String(32))
     identifier = Column(String(256))
+    channel = Column(String(256))
 
 
 class IdentifierEntity(Base):
@@ -40,15 +41,15 @@ class Storage:
         Session = sessionmaker(bind=self._engine)
         self._session = Session()
 
-    def add_embedding(self, detail: str, embedding: list[float], url: str, title: str, author: str, identifier: str):
+    def add_embedding(self, detail: str, embedding: list[float], url: str, title: str, author: str, identifier: str, channel: str):
         """添加新的嵌入向量"""
-        self._session.add(EmbeddingEntity(detail=detail, embedding=embedding, url=url, title=title, author=author, identifier=identifier))
+        self._session.add(EmbeddingEntity(detail=detail, embedding=embedding, url=url, title=title, author=author, identifier=identifier, channel=channel))
         self._session.commit()
 
-    def add_all_embedding(self, embeddings: list[tuple[str, list[float], str, str, str, str]]):
+    def add_all_embedding(self, embeddings: list[tuple[str, list[float], str, str, str, str, str]]):
         """添加多个嵌入向量"""
-        data = [EmbeddingEntity(detail=detail, embedding=embedding, url=url, title=title, author=author, identifier=identifier)
-                for detail, embedding, url, title, author, identifier in embeddings]
+        data = [EmbeddingEntity(detail=detail, embedding=embedding, url=url, title=title, author=author, identifier=identifier, channel=channel)
+                for detail, embedding, url, title, author, identifier, channel in embeddings]
         self._session.add_all(data)
         self._session.commit()
 

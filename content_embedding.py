@@ -117,7 +117,7 @@ def audio_to_db(item) -> None:
 
             try:
                 storage.add_identifier(item['identifier'], audio_md5)
-                storage.add_embedding(text, vector, item['url'], item['title'], item['author'], item['identifier'])
+                storage.add_embedding(text, vector, item['url'], item['title'], item['author'], item['identifier'], item['channel'])
                 print(f"> 完成插入text: [{text[0:10]}], embedding: {vector[0:3]}")
             except Exception as e:
                 storage.delete_identifier(item['identifier'])
