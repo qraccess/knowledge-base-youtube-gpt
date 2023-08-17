@@ -31,12 +31,13 @@ def split_string(input_string: str) -> Generator[str, None, None]:
     参数：
         input_string: 要分割的字符串。
     生成：
-        输入字符串的每个块, 最大长度为600。
+        输入字符串的每个块, 最大长度为600。overlay = 120
     """
     max_length = 600
+    overlay_length = 120
     while len(input_string) > max_length:
         yield input_string[:max_length]
-        input_string = input_string[max_length:]
+        input_string = input_string[max_length-overlay_length:]
     yield input_string
 
 
@@ -56,7 +57,7 @@ def md_files_to_string(dir_path: str) -> Generator[Generator[str, None, None], N
 
 def md_file_to_string(file_path: str) -> Generator[Generator[str, None, None], None, None]:
     """
-    此函数用于读取给定目录下所有的 .md 文件，并将其内容分成最大长度为 600 的字符串，逐一生成这些字符串。
+    此函数用于指定md 文件将其内容分成最大长度为 600 的字符串，重复120字符串，逐一生成这些字符串。
     参数：
         dir_path: 包含 .md 文件的目录路径。
     生成器输出：

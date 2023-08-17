@@ -69,7 +69,7 @@ def download_youtube_single_audio(video_url, shared_dict):
 
 
 def audios_to_md(audios):
-    whisper_model = WhisperModel(model_size, device="auto", compute_type="default")
+    whisper_model = WhisperModel(model_size, device="auto", compute_type="auto")
     for audio in audios:
         if os.path.exists(os.path.join(md_dir, audio.split('.')[0] + '.md')):
             continue
@@ -79,9 +79,10 @@ def audios_to_md(audios):
             segments, info = whisper_model.transcribe(mp3file,
                                                     beam_size=5, vad_filter=True,
                                                     vad_parameters=dict(min_silence_duration_ms=50))
-
-            texts = [segment.text for segment in segments]
-            print(texts)
+            texts = []
+            for segment in segments:
+                print(segment.text)
+                texts.append(segment.text)
             if texts:
                 with open(os.path.join(md_dir, audio.split('.')[0] + '.md'), 'w', encoding='utf-8') as f:
                     f.write('\n'.join(texts))
@@ -121,8 +122,7 @@ def download_youtube_audios(url):
     with Pool(processes=num_cores//2) as p:  # Adjust this number based on your system's capabilities
         # Use the pool's map method to apply download_youtube_single_audio to every URL
         p.starmap(download_youtube_single_audio, [(item, shared_dict) for item in urls])
-    return shared_dict
-
+    return list(shared_dict.values())
 
 
 if __name__ == '__main__':
