@@ -69,20 +69,23 @@ def download_youtube_single_audio(video_url, shared_dict):
 
 
 def audios_to_md(audios):
-    whisper_model = WhisperModel(model_size, device="auto", compute_type="auto")
+    whisper_model = WhisperModel(model_size, device="auto", compute_type="default")
     for audio in audios:
+        if os.path.exists(os.path.join(md_dir, audio.split('.')[0] + '.md')):
+            continue
         try:
-            print('transcribing: ', audio['title'])
-            mp3file = os.path.join(raw_dir, audio['identifier'] + '.mp3')
+            print('transcribing: ', audio)
+            mp3file = os.path.join(raw_dir, audio)
             segments, info = whisper_model.transcribe(mp3file,
                                                     beam_size=5, vad_filter=True,
                                                     vad_parameters=dict(min_silence_duration_ms=50))
 
             texts = [segment.text for segment in segments]
+            print(texts)
             if texts:
-                with open(os.path.join(md_dir, audio['identifier'] + '.md'), 'w') as f:
-                    f.write(f'# {audio["title"]}\n')
+                with open(os.path.join(md_dir, audio.split('.')[0] + '.md'), 'w', encoding='utf-8') as f:
                     f.write('\n'.join(texts))
+                print('done: ', audio)
         except Exception as e:
             print(e)
             continue
@@ -121,7 +124,9 @@ def download_youtube_audios(url):
     return shared_dict
 
 
+
 if __name__ == '__main__':
-    url='https://www.youtube.com/watch?v=SfaHCX0qTlQ&list=PLlHw500PGQdJJ_-ENpCy7vVfewvraQCOj'
-    audios = download_youtube_audios(url)
+    # url='https://www.youtube.com/watch?v=SfaHCX0qTlQ&list=PLlHw500PGQdJJ_-ENpCy7vVfewvraQCOj'
+    # download_youtube_audios(url)
+    audios = [item for item in os.listdir(raw_dir) if item.endswith('.mp3')]
     audios_to_md(audios)
